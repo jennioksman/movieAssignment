@@ -1,4 +1,5 @@
 import express from 'express'
+import { pgPool } from './connections'
 
 var app = express()
 
