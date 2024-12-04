@@ -33,28 +33,31 @@ app.get('/movie', async (req,res)=> {
     }  
 })
 
-app.get('/movie/id', async (req,res)=> {
-    try{
-        
-    }catch(err){
-        
-    }  
-})
-
-app.get('/movie/keyword', async (req,res) => {
+app.get('/movie/search', async (req,res) => {
     try {
-        
-    } catch (error) {
-        
+        const {keyword} = req.query
+        const response = await pgPool.query( 'SELECT name FROM movie WHERE name ILIKE $1', [`%${keyword}%`])
+        res.json(response.rows)
+    }catch(err){
+        console.log(err.message)
     }
 })
 
-app.delete('/movie/id', async (req,res) => {
+app.get('/movie/:id', async (req,res)=> {
     try{
-        const response = await pgPool.query("SELECT * FROM movie ")
+        const {id} = req.params
+        const response = await pgPool.query('SELECT name, year, genre FROM movie WHERE id=$1', [id])
         res.json(response.rows)
     }catch(err){
-        console.log(err.message);
+        console.log(err.message)
+    }  
+})
+
+app.delete('/movie/:id', async (req,res) => {
+    try{
+        
+    }catch(err){
+        console.log(err.message)
     }  
 })
 
@@ -66,7 +69,7 @@ app.post('/genre', async (req,res) => {
     }
 })
 
-app.get('/user/{username}/favorite_movie', async (req,res) => {
+app.get('/user/:username/favorite_movie', async (req,res) => {
     try {
         
     } catch (error) {
@@ -74,7 +77,7 @@ app.get('/user/{username}/favorite_movie', async (req,res) => {
     }
 })
 
-app.post('/user/{username}/favorite_movie', async (req,res) => {
+app.post('/user/:username/favorite_movie', async (req,res) => {
     try {
         
     } catch (error) {
