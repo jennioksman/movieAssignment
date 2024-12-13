@@ -10,22 +10,23 @@ app.listen(3001, () => {
     console.log('Server in running...')
 })
 
-
-app.post('/user/register', async (req,res) => {
+//Registering a new user
+app.post('/users/register', async (req,res) => {
     try {
         let name = req.body.name
         let username = req.body.username
         let password = req.body.password
-        let year = req.body.year
+        let year = req.body.year_of_birth
         
         const response = await pgPool.query('INSERT INTO users (name, username, password, year_of_birth) VALUES ($1, $2, $3, $4)', [name, username, password, year])
         console.log(req.body)
-        res.send(response.rows)
+        res.send('New user registered')
     } catch (error) {
         console.log(error)
     }
 })
 
+//Adding a new movie
 app.post('/movie', async (req,res) => {
     try{
         let name = req.body.name
@@ -33,12 +34,13 @@ app.post('/movie', async (req,res) => {
         let genre = req.body.genre
         const response = await pgPool.query('INSERT INTO movie (name, year, genre) VALUES ($1, $2, $3)', [name, year, genre])
         console.log(req.body)
-        res.send(response.rows)
+        res.send('Movie added!')
     }catch (error) {
-        console.log(error)
+        console.log('Unable to add the movie. Please add first the genre in Genres')
     }
 })
 
+//Getting all movies
 app.get('/movie', async (req,res)=> {
     try{
         const response = await pgPool.query("SELECT * FROM movie ")
@@ -48,16 +50,18 @@ app.get('/movie', async (req,res)=> {
     }  
 })
 
+//Getting movie by keyword
 app.get('/movie/search', async (req,res) => {
     try {
         const {keyword} = req.query
-        const response = await pgPool.query( 'SELECT name FROM movie WHERE name ILIKE $1', [`%${keyword}%`])
+        const response = await pgPool.query( 'SELECT * FROM movie WHERE name ILIKE $1', [`%${keyword}%`])
         res.json(response.rows)
     }catch(err){
         console.log(err.message)
     }
 })
 
+//Getting movie by id
 app.get('/movie/:id', async (req,res)=> {
     try{
         const {id} = req.params
@@ -68,56 +72,92 @@ app.get('/movie/:id', async (req,res)=> {
     }  
 })
 
-app.delete('/movie/:id', async (req,res) => {
+//Deleting movie by id
+app.delete('/movie/remove', async (req,res) => {
     try{
-        
-    }catch(err){
-        console.log(err.message)
+        let {id} = req.body
+        const response = await pgPool.query('DELETE FROM movie WHERE id=($1)', [id])
+        res.send('Movie removed!')
+    } catch (error) {
+        console.log(error)
     }  
 })
 
+//Adding a new genre
 app.post('/genre', async (req,res) => {
     try {
-        let genre = req.body.genre
+        let genre = req.body.name
         const response = await pgPool.query('INSERT INTO genre (name) VALUES ($1)', [genre])
         console.log(genre)
-        res.send(response.rows)
+        res.send('Genre added.')
     } catch (error) {
         console.log(error)
     }
 })
 
-app.get('/user/:username/favorite_movie', async (req,res) => {
+//Getting favourite movie by username
+app.get('/user/:username/favourite_movie', async (req,res) => {
     try {
-        
+        const {username} = req.params
+        const response = await pgPool.query(
+            "SELECT users.username, movie.name FROM users, movie, favourite_movie WHERE users.id=favourite_movie.users AND movie.id=favourite_movie.movie AND users.username=$1", [username])
+        res.json(response.rows)
     } catch (error) {
-        
+        console.log(err.message)
     }
 })
 
-app.post('/user/:username/favorite_movie', async (req,res) => {
+//Adding favourite movie for user
+app.post('/user/favourite_movie', async (req,res) => {
     try {
-      
-    } catch (error) {
-        
+        let user = req.body.username
+        let movie = req.body.name
+
+        const movieResponse = await pgPool.query('SELECT id, name FROM movie WHERE name=$1', [movie])
+        const movieId = movieResponse.rows[0].id
+
+        const userResponse = await pgPool.query('SELECT id, username FROM users WHERE username=$1', [user])
+        const userId = userResponse.rows[0].id
+
+        const response = await pgPool.query('INSERT INTO favourite_movie (movie, users) VALUES ($1, $2)', [movieId, userId])
+        console.log(req.body)
+        res.send('Favourite movie added.')
+    }catch(err){
+        console.log(err.message) 
     }
 })
 
-app.post('/rating/', async (req,res) => {
+//Adding movie review
+app.post('/rating', async (req,res) => {
     try {
-        const {username} = req.body
-        const {movie, stars, review_text} = req.body
+        let username = req.body.username
+        let movie = req.body.name
+        let stars = req.body.stars
+        let text = req.body.review_text
         const response = await pgPool.query('SELECT id, username FROM users WHERE username=$1', [username])
         const userId = response.rows[0].id
 
-        const result = await pgPool.query('SELECT id FROM movie WHERE name=$1', [movie])
+        const result = await pgPool.query('SELECT id, name FROM movie WHERE name=$1', [movie])
         const movieId = result.rows[0].id
 
-        const reviewResult = await pgPool.query('INSERT INTO review (movie, users, stars, review_text) VALUES ($1, $2, $3, $4)', [movieId, userId, stars, review_text])
+        const reviewResult = await pgPool.query('INSERT INTO review (movie, users, stars, review_text) VALUES ($1, $2, $3, $4)', [movieId, userId, stars, text])
         console.log(reviewResult)
-        res.send(reviewResult.rows)
+        res.send('Thank you for your review!')
     } catch (error) {
-        
+        console.log(error.message)
+    }
+})
+
+
+//Tää on ylimääränen testi, POISTA LOPUKSI!!!
+app.get('/rating/:username', async (req,res) => {
+    try {
+        const username = req.params
+        const response = await pgPool.query(
+            "SELECT users.username, movie.name, review.stars, review.review_text FROM users, movie, review WHERE users.id=review.users AND movie.id=review.movie AND users.username=$1", [username])
+        res.json(response.rows)
+    }catch(err){
+        console.log(err.message)
     }
 })
 
