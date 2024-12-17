@@ -19,7 +19,6 @@ app.post('/users/register', async (req,res) => {
         let year = req.body.year_of_birth
         
         const response = await pgPool.query('INSERT INTO users (name, username, password, year_of_birth) VALUES ($1, $2, $3, $4)', [name, username, password, year])
-        console.log(req.body)
         res.send('New user registered')
     } catch (error) {
         console.log(error)
@@ -33,10 +32,9 @@ app.post('/movie', async (req,res) => {
         let year = req.body.year
         let genre = req.body.genre
         const response = await pgPool.query('INSERT INTO movie (name, year, genre) VALUES ($1, $2, $3)', [name, year, genre])
-        console.log(req.body)
         res.send('Movie added!')
     }catch (error) {
-        console.log('Unable to add the movie. Please add first the genre in Genres')
+        console.log(err.message)
     }
 })
 
@@ -76,11 +74,12 @@ app.get('/movie/:id', async (req,res)=> {
 app.delete('/movie/remove', async (req,res) => {
     try{
         let {id} = req.body
-        const response = await pgPool.query('DELETE FROM movie WHERE id=($1)', [id])
+        const response = await pgPool.query('DELETE FROM movie WHERE id=($1)', [id])   
         res.send('Movie removed!')
-    } catch (error) {
-        console.log(error)
-    }  
+        
+    }catch(error){  
+        res.status(400).send('Unable to remove a movie being favourit or reviewed.')  
+    } 
 })
 
 //Adding a new genre
@@ -120,7 +119,6 @@ app.post('/user/favourite_movie', async (req,res) => {
         const userId = userResponse.rows[0].id
 
         const response = await pgPool.query('INSERT INTO favourite_movie (movie, users) VALUES ($1, $2)', [movieId, userId])
-        console.log(req.body)
         res.send('Favourite movie added.')
     }catch(err){
         console.log(err.message) 
@@ -144,20 +142,8 @@ app.post('/rating', async (req,res) => {
         console.log(reviewResult)
         res.send('Thank you for your review!')
     } catch (error) {
-        console.log(error.message)
-    }
-})
-
-
-//Tää on ylimääränen testi, POISTA LOPUKSI!!!
-app.get('/rating/:username', async (req,res) => {
-    try {
-        const username = req.params
-        const response = await pgPool.query(
-            "SELECT users.username, movie.name, review.stars, review.review_text FROM users, movie, review WHERE users.id=review.users AND movie.id=review.movie AND users.username=$1", [username])
-        res.json(response.rows)
-    }catch(err){
         console.log(err.message)
     }
 })
+
 
