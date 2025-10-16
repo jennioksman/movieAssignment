@@ -2,12 +2,6 @@ import { createBrowserRouter, Link, Outlet, RouterProvider } from 'react-router-
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar'
-import Home from '../pages/Home'
-import AddMovie from '../pages/AddMovie'
-import Favourites from '../pages/Favourites'
-import Register from '../pages/Register'
-import Movies from '../pages/Movies'
-
 
 export default function NavigationBar() {
 

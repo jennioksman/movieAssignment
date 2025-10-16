@@ -8,6 +8,7 @@ import Movies from './pages/Movies'
 import Footer from './components/Footer'
 
 import '../styles/App.css'
+import Header from './components/Header'
 
 const router = createBrowserRouter([
         {
@@ -42,6 +43,7 @@ function App() {
 
   return (
     <div>
+      <Header />
       <RouterProvider router={router} />
       <Footer />
     </div>

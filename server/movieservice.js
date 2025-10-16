@@ -1,8 +1,10 @@
 import express from 'express'
+import cors from 'cors'
 import { pgPool } from './connections.js'
 
 var app = express()
 
+app.use(cors())
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 
@@ -34,7 +36,7 @@ app.post('/movie', async (req,res) => {
         const response = await pgPool.query('INSERT INTO movie (name, year, genre) VALUES ($1, $2, $3)', [name, year, genre])
         res.send('Movie added!')
     }catch (error) {
-        console.log(err.message)
+        console.log(error.message)
     }
 })
 
@@ -43,8 +45,8 @@ app.get('/movie', async (req,res)=> {
     try{
         const response = await pgPool.query("SELECT * FROM movie ")
         res.json(response.rows)
-    }catch(err){
-        console.log(err.message)
+    }catch(error){
+        console.log(error.message)
     }  
 })
 
@@ -54,8 +56,8 @@ app.get('/movie/search', async (req,res) => {
         const {keyword} = req.query
         const response = await pgPool.query( 'SELECT * FROM movie WHERE name ILIKE $1', [`%${keyword}%`])
         res.json(response.rows)
-    }catch(err){
-        console.log(err.message)
+    }catch(error){
+        console.log(error.message)
     }
 })
 
@@ -65,8 +67,8 @@ app.get('/movie/:id', async (req,res)=> {
         const {id} = req.params
         const response = await pgPool.query('SELECT name, year, genre FROM movie WHERE id=$1', [id])
         res.json(response.rows)
-    }catch(err){
-        console.log(err.message)
+    }catch(error){
+        console.log(error.message)
     }  
 })
 
@@ -102,7 +104,7 @@ app.get('/user/:username/favourite_movie', async (req,res) => {
             "SELECT users.username, movie.name FROM users, movie, favourite_movie WHERE users.id=favourite_movie.users AND movie.id=favourite_movie.movie AND users.username=$1", [username])
         res.json(response.rows)
     } catch (error) {
-        console.log(err.message)
+        console.log(error.message)
     }
 })
 
@@ -120,8 +122,8 @@ app.post('/user/favourite_movie', async (req,res) => {
 
         const response = await pgPool.query('INSERT INTO favourite_movie (movie, users) VALUES ($1, $2)', [movieId, userId])
         res.send('Favourite movie added.')
-    }catch(err){
-        console.log(err.message) 
+    }catch(error){
+        console.log(error.message) 
     }
 })
 
@@ -142,7 +144,7 @@ app.post('/rating', async (req,res) => {
         console.log(reviewResult)
         res.send('Thank you for your review!')
     } catch (error) {
-        console.log(err.message)
+        console.log(error.message)
     }
 })
 
