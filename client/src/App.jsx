@@ -7,7 +7,7 @@ import Register from './pages/Register'
 import Movies from './pages/Movies'
 import Footer from './components/Footer'
 
-import './styles/App.css'
+import '../styles/App.css'
 
 const router = createBrowserRouter([
         {
