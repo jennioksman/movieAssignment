@@ -1,4 +1,4 @@
-
+import AddMovieForm from '../components/AddMovieForm'
 
 function AddMovie() {
   return (

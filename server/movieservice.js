@@ -34,9 +34,12 @@ app.post('/movie', async (req,res) => {
         let year = req.body.year
         let genre = req.body.genre
         const response = await pgPool.query('INSERT INTO movie (name, year, genre) VALUES ($1, $2, $3)', [name, year, genre])
-        res.send('Movie added!')
+        // Return JSON and a 201 status
+        res.status(201).json({ message: 'Movie added!' })
     }catch (error) {
         console.log(error.message)
+        // Return error JSON and 500 so client can surface it
+        res.status(500).json({ error: error.message || 'Internal server error' })
     }
 })
 
